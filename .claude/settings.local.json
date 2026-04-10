@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --turbopack --skip-install)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(cd /tmp)",
+      "Bash(rm -rf location-manager)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(pnpx shadcn@latest init -d)"
+    ]
+  }
+}
