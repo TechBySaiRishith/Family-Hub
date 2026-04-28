@@ -9,7 +9,21 @@
       "Bash(pnpm add:*)",
       "Bash(pnpm approve-builds:*)",
       "Bash(pnpm rebuild:*)",
-      "Bash(pnpx shadcn@latest init -d)"
+      "Bash(pnpx shadcn@latest init -d)",
+      "Bash(pnpx shadcn@latest add button card input label dialog select badge tabs avatar dropdown-menu separator sheet toast textarea popover command scroll-area toggle-group switch form -y)",
+      "Bash(pnpx shadcn@latest add button card input label dialog select badge tabs avatar dropdown-menu separator sheet sonner textarea popover command scroll-area toggle-group switch form -y)",
+      "Bash(cp .env.example .env.local)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\")",
+      "Read(//tmp/**)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm ls:*)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm lint *)",
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
     ]
   }
 }

@@ -1,0 +1,12 @@
+services:
+  location-manager:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data/location-manager.db
+      - AUTH_SECRET=${AUTH_SECRET:-change-me-to-a-random-secret}
+      - AUTH_URL=${AUTH_URL:-http://localhost:3000}
+    restart: unless-stopped
