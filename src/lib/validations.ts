@@ -124,3 +124,69 @@ export const updateNotificationPrefsSchema = z.object({
   whatsappNumber: z.string().max(20).optional(),
   daysBeforeExpiry: z.number().int().min(1).max(14).optional(),
 });
+
+// Tote validations
+
+export const eventTypeEnum = z.enum(["wedding", "trip", "day_out", "other"]);
+
+export const itemCategoryEnum = z.enum([
+  "outfits", "documents", "toiletries", "electronics",
+  "family_kit", "snacks", "medicines", "other",
+]);
+
+export const itemScopeEnum = z.enum(["shared", "user"]);
+
+export const createEventSchema = z.object({
+  title: z.string().min(1).max(200),
+  eventType: eventTypeEnum.default("other"),
+  eventDate: z.string().min(1),  // ISO date string from <input type="date">
+  destination: z.string().max(500).default(""),
+  notes: z.string().max(2000).default(""),
+  templateId: z.string().nullable().optional(),
+});
+
+export const updateEventSchema = createEventSchema.partial().omit({ templateId: true });
+
+export const createChecklistItemSchema = z.object({
+  eventId: z.string().min(1),
+  scope: itemScopeEnum,
+  text: z.string().min(1).max(200),
+  quantity: z.number().int().positive().nullable().optional(),
+  itemNotes: z.string().max(500).default(""),
+  category: itemCategoryEnum.default("other"),
+});
+
+export const updateChecklistItemSchema = z.object({
+  text: z.string().min(1).max(200).optional(),
+  quantity: z.number().int().positive().nullable().optional(),
+  itemNotes: z.string().max(500).optional(),
+  category: itemCategoryEnum.optional(),
+  sortOrder: z.number().int().nonnegative().optional(),
+});
+
+export const saveAsTemplateSchema = z.object({
+  name: z.string().min(1).max(100),
+  scope: itemScopeEnum.default("shared"),  // which list to capture: shared or my private
+});
+
+export const updateTemplateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  eventType: eventTypeEnum.optional(),
+});
+
+export const createTemplateItemSchema = z.object({
+  text: z.string().min(1).max(200),
+  quantity: z.number().int().positive().nullable().optional(),
+  category: itemCategoryEnum.default("other"),
+});
+
+export const updateTemplateItemSchema = z.object({
+  text: z.string().min(1).max(200).optional(),
+  quantity: z.number().int().positive().nullable().optional(),
+  category: itemCategoryEnum.optional(),
+  sortOrder: z.number().int().nonnegative().optional(),
+});
+
+export const forkTemplateSchema = z.object({
+  name: z.string().min(1).max(100).optional(),  // defaults to "<original> (copy)"
+});

@@ -1,6 +1,7 @@
 import type { MiniApp, ShareTargetInput, ShareTargetRule } from "./types";
 import { locationsMiniApp } from "./locations";
 import { couponsMiniApp, couponsTextFallback } from "./coupons";
+import { toteMiniApp } from "./tote";
 
 /**
  * The single source of truth for all mini-apps in FamilyHub.
@@ -12,7 +13,7 @@ import { couponsMiniApp, couponsTextFallback } from "./coupons";
  *
  * The sidebar, dashboard, and share-target dispatcher will pick it up.
  */
-const REGISTRY: MiniApp[] = [locationsMiniApp, couponsMiniApp];
+const REGISTRY: MiniApp[] = [locationsMiniApp, couponsMiniApp, toteMiniApp];
 
 /**
  * Extra share-target rules that aren't tied to a single mini-app

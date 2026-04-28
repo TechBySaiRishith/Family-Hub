@@ -114,3 +114,61 @@ export const reminderLog = sqliteTable("reminder_log", {
   channel: text("channel", { enum: ["push", "email", "whatsapp"] }).notNull(),
   sentAt: integer("sent_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
+
+// Tote mini-app — pre-event packing checklists.
+
+export const events = sqliteTable("events", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  eventType: text("event_type", {
+    enum: ["wedding", "trip", "day_out", "other"],
+  }).notNull().default("other"),
+  eventDate: integer("event_date", { mode: "timestamp_ms" }).notNull(),
+  destination: text("destination").default(""),
+  notes: text("notes").default(""),
+  createdById: text("created_by_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const checklistItems = sqliteTable("checklist_items", {
+  id: text("id").primaryKey(),
+  eventId: text("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  scope: text("scope", { enum: ["shared", "user"] }).notNull(),
+  // Required when scope === 'user'; null when 'shared'
+  userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  quantity: integer("quantity"),
+  itemNotes: text("item_notes").default(""),
+  category: text("category", {
+    enum: ["outfits", "documents", "toiletries", "electronics", "family_kit", "snacks", "medicines", "other"],
+  }).notNull().default("other"),
+  isChecked: integer("is_checked", { mode: "boolean" }).notNull().default(false),
+  checkedById: text("checked_by_id").references(() => users.id, { onDelete: "set null" }),
+  checkedAt: integer("checked_at", { mode: "timestamp_ms" }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const checklistTemplates = sqliteTable("checklist_templates", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  eventType: text("event_type", {
+    enum: ["wedding", "trip", "day_out", "other"],
+  }).notNull(),
+  isBuiltIn: integer("is_built_in", { mode: "boolean" }).notNull().default(false),
+  // null for built-ins; user id for personal templates
+  createdById: text("created_by_id").references(() => users.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const checklistTemplateItems = sqliteTable("checklist_template_items", {
+  id: text("id").primaryKey(),
+  templateId: text("template_id").notNull().references(() => checklistTemplates.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  quantity: integer("quantity"),
+  category: text("category", {
+    enum: ["outfits", "documents", "toiletries", "electronics", "family_kit", "snacks", "medicines", "other"],
+  }).notNull().default("other"),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
