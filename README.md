@@ -93,15 +93,19 @@ Members register with the invite code, then visit their own `/settings` to opt i
 
 ## Deploy on Raspberry Pi
 
+Quick path:
+
 ```bash
-git clone <repo> familyhub && cd familyhub
+git clone https://github.com/TechBySaiRishith/Family-Hub.git familyhub && cd familyhub
 cp .env.example .env.local
-# set AUTH_SECRET and AUTH_URL=http://<your-pi>:3000
+# set AUTH_SECRET (openssl rand -base64 32) and AUTH_URL=http://<pi>:3000
 
 docker compose up -d --build
 ```
 
-Data lives in `./data/` (SQLite + uploads). Back it up by copying the folder.
+Data lives in `./data/` (SQLite + uploads). Schema migrations apply automatically on each boot — no manual `drizzle-kit push` step.
+
+**Full step-by-step guide** (Pi prep, Docker, Tailscale, SMTP/Twilio/VAPID setup, cron scheduling, backups, troubleshooting): see [`docs/RASPBERRY-PI.md`](docs/RASPBERRY-PI.md).
 
 ## Reminders
 
