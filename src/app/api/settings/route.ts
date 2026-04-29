@@ -49,6 +49,7 @@ export async function GET() {
     smtpHost, smtpPort, smtpUser, smtpPass, smtpFrom,
     vapidPublicKey, vapidPrivateKey, vapidSubject,
     twilioSid, twilioToken, twilioFrom,
+    larderWhatsappNumber, larderWhatsappLabel,
     cronToken,
   ] = await Promise.all([
     getSetting("map_provider"),
@@ -66,6 +67,8 @@ export async function GET() {
     getSetting("twilio_sid"),
     getSetting("twilio_token"),
     getSetting("twilio_from"),
+    getSetting("larder_whatsapp_number"),
+    getSetting("larder_whatsapp_label"),
     getSetting("reminder_cron_token"),
   ]);
 
@@ -91,6 +94,9 @@ export async function GET() {
     twilioToken: mask(twilioToken),
     twilioTokenConfigured: !!twilioToken,
     twilioFrom: twilioFrom || "",
+
+    larderWhatsappNumber: larderWhatsappNumber || "",
+    larderWhatsappLabel: larderWhatsappLabel || "",
 
     cronToken: cronToken || "",
   });
@@ -125,6 +131,8 @@ export async function PUT(req: NextRequest) {
     twilio_sid: data.twilioSid,
     twilio_token: data.twilioToken,
     twilio_from: data.twilioFrom,
+    larder_whatsapp_number: data.larderWhatsappNumber,
+    larder_whatsapp_label: data.larderWhatsappLabel,
   };
 
   for (const [k, v] of Object.entries(map)) {

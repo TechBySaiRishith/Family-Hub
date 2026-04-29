@@ -73,6 +73,16 @@ export const updateSettingsSchema = z.object({
   twilioSid: z.string().optional(),
   twilioToken: z.string().optional(),
   twilioFrom: z.string().optional(),
+  // Larder direct-send WhatsApp recipient (optional, opt-in alongside Twilio).
+  // Accept E.164-ish input or empty; the API normalises to digits before use.
+  larderWhatsappNumber: z
+    .string()
+    .max(20)
+    .refine((v) => v === "" || /^\+?[1-9]\d{6,18}$/.test(v.replace(/[\s-]/g, "")), {
+      message: "Enter an international number, e.g. +919876543210",
+    })
+    .optional(),
+  larderWhatsappLabel: z.string().max(80).optional(),
 });
 
 // Coupon validations
@@ -190,3 +200,21 @@ export const updateTemplateItemSchema = z.object({
 export const forkTemplateSchema = z.object({
   name: z.string().min(1).max(100).optional(),  // defaults to "<original> (copy)"
 });
+
+// Larder validations
+
+export const larderCategoryEnum = z.enum([
+  "produce", "dairy_eggs", "pantry", "bakery", "frozen",
+  "beverages", "household", "toiletries", "other",
+]);
+
+export const createLarderItemSchema = z.object({
+  name: z.string().min(1).max(120),
+  quantity: z.string().max(60).default(""),
+  itemNotes: z.string().max(300).default(""),
+  category: larderCategoryEnum.default("other"),
+});
+
+export const updateLarderItemSchema = createLarderItemSchema.partial();
+
+export const setBoughtSchema = z.object({ bought: z.boolean() });

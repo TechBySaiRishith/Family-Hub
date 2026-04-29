@@ -19,6 +19,8 @@ interface Settings {
   twilioSid: string;
   twilioToken: string;
   twilioFrom: string;
+  larderWhatsappNumber: string;
+  larderWhatsappLabel: string;
   cronToken: string;
 }
 
@@ -34,6 +36,8 @@ const DEFAULT: Settings = {
   twilioSid: "",
   twilioToken: "",
   twilioFrom: "",
+  larderWhatsappNumber: "",
+  larderWhatsappLabel: "",
   cronToken: "",
 };
 
@@ -240,6 +244,42 @@ export function ReminderServicesForm() {
               onChange={(e) => setSettings((s) => ({ ...s, twilioFrom: e.target.value }))}
               placeholder="whatsapp:+14155238886"
               className="h-11 border-0 border-b border-foreground/20 rounded-none bg-transparent px-0 text-base focus-visible:border-accent focus-visible:ring-0 shadow-none font-mono"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Larder direct-send (Twilio) */}
+      <section>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-3">
+          Larder direct-send
+        </p>
+        <p className="text-xs text-muted-foreground mb-4 max-w-prose">
+          Optional. When set and Twilio above is configured, the Larder page can
+          send the shopping list straight to a chosen WhatsApp number — no
+          browser hop. Leave blank to keep the web-link flow only.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              Recipient number (E.164)
+            </Label>
+            <Input
+              value={settings.larderWhatsappNumber}
+              onChange={(e) => setSettings((s) => ({ ...s, larderWhatsappNumber: e.target.value }))}
+              placeholder="+919876543210"
+              className="h-11 border-0 border-b border-foreground/20 rounded-none bg-transparent px-0 text-base focus-visible:border-accent focus-visible:ring-0 shadow-none font-mono"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+              Label (shown on Larder page)
+            </Label>
+            <Input
+              value={settings.larderWhatsappLabel}
+              onChange={(e) => setSettings((s) => ({ ...s, larderWhatsappLabel: e.target.value }))}
+              placeholder="Mum's WhatsApp"
+              className="h-11 border-0 border-b border-foreground/20 rounded-none bg-transparent px-0 text-base focus-visible:border-accent focus-visible:ring-0 shadow-none"
             />
           </div>
         </div>

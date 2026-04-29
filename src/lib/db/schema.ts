@@ -172,3 +172,32 @@ export const checklistTemplateItems = sqliteTable("checklist_template_items", {
   }).notNull().default("other"),
   sortOrder: integer("sort_order").notNull().default(0),
 });
+
+// Larder mini-app — household items that have run out / need restocking.
+
+export const larderItems = sqliteTable("larder_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  // text not number — groceries vary: "2 litres" / "500g" / "1 packet"
+  quantity: text("quantity").default(""),
+  itemNotes: text("item_notes").default(""),
+  category: text("category", {
+    enum: [
+      "produce",
+      "dairy_eggs",
+      "pantry",
+      "bakery",
+      "frozen",
+      "beverages",
+      "household",
+      "toiletries",
+      "other",
+    ],
+  }).notNull().default("other"),
+  isBought: integer("is_bought", { mode: "boolean" }).notNull().default(false),
+  boughtById: text("bought_by_id").references(() => users.id, { onDelete: "set null" }),
+  boughtAt: integer("bought_at", { mode: "timestamp_ms" }),
+  addedById: text("added_by_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  addedAt: integer("added_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
+});
