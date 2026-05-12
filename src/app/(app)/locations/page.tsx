@@ -11,7 +11,7 @@ import { useAppStore } from "@/stores/app-store";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { haversineDistance } from "@/lib/geo";
 import { Button } from "@/components/ui/button";
-import { Plus, Map as MapIcon, List, Loader2, MapPin } from "lucide-react";
+import { Plus, Map as MapIcon, List, Loader2, MapPin, RefreshCw, Crosshair } from "lucide-react";
 import type { MarkerData } from "@/lib/map-providers/types";
 
 interface Location {
@@ -188,10 +188,39 @@ export default function LocationsPage() {
         ) : (
           <>
             <div className="hidden sm:flex items-center justify-between mb-6 pb-4 border-b border-foreground/10">
-              <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground">
-                {filtered.length} {filtered.length === 1 ? "result" : "results"}
-                {geo.latitude && " · sorted by distance"}
-              </p>
+              <div className="flex items-center gap-3 flex-wrap text-xs tracking-[0.2em] uppercase text-muted-foreground">
+                <span>
+                  {filtered.length} {filtered.length === 1 ? "result" : "results"}
+                  {geo.latitude && " · nearest first"}
+                </span>
+                {geo.latitude && geo.accuracy !== null && (
+                  <span
+                    className="inline-flex items-center gap-1 normal-case tracking-normal text-[11px] text-muted-foreground/70"
+                    title={
+                      geo.accuracy > 500
+                        ? "Low-precision location — likely wifi/IP fallback. Distances are rough."
+                        : `Position accurate to about ±${Math.round(geo.accuracy)}m`
+                    }
+                  >
+                    <Crosshair className="h-3 w-3" strokeWidth={1.5} />
+                    ±{geo.accuracy < 1000 ? `${Math.round(geo.accuracy)}m` : `${(geo.accuracy / 1000).toFixed(1)}km`}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={geo.refresh}
+                  disabled={geo.loading}
+                  className="inline-flex items-center gap-1 normal-case tracking-normal text-[11px] text-accent hover:underline disabled:opacity-50 disabled:no-underline"
+                >
+                  <RefreshCw className={`h-3 w-3 ${geo.loading ? "animate-spin" : ""}`} strokeWidth={1.5} />
+                  {geo.loading ? "Locating…" : "Refresh location"}
+                </button>
+                {geo.error && (
+                  <span className="normal-case tracking-normal text-[11px] text-destructive/80">
+                    {geo.error}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-1 p-1 rounded-full border border-foreground/15">
                 <button
                   onClick={() => setViewMode("list")}

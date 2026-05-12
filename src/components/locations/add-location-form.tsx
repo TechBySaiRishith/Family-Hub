@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Search, MapPin, Check, ArrowRight, Camera, Map as MapIconLucide } from "lucide-react";
+import { Loader2, Search, MapPin, Check, ArrowRight, Camera, Map as MapIconLucide, Crosshair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -51,6 +51,9 @@ export function AddLocationForm({ initialUrl }: AddLocationFormProps) {
   const [geocodeQuery, setGeocodeQuery] = useState("");
   const [geocodeResults, setGeocodeResults] = useState<{ lat: number; lng: number; displayName: string }[]>([]);
   const [searchingGeo, setSearchingGeo] = useState(false);
+
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialUrl) {
@@ -119,6 +122,46 @@ export function AddLocationForm({ initialUrl }: AddLocationFormProps) {
     }
   }
 
+  function handleUseCurrentLocation() {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setLocateError("This browser doesn't support geolocation.");
+      return;
+    }
+    setLocateError(null);
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setLatitude(lat);
+        setLongitude(lng);
+        setSourceType("manual");
+        try {
+          const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.address) setAddress(data.address);
+          }
+        } finally {
+          setLocating(false);
+        }
+      },
+      (err) => {
+        const message =
+          err.code === err.PERMISSION_DENIED
+            ? "Location permission denied. Enable it for this site in your browser settings."
+            : err.code === err.POSITION_UNAVAILABLE
+              ? "Couldn't get a GPS fix. Try moving outdoors or closer to a window."
+              : err.code === err.TIMEOUT
+                ? "Location request timed out. Try again."
+                : err.message;
+        setLocateError(message);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
+
   function selectGeoResult(result: { lat: number; lng: number; displayName: string }) {
     setLatitude(result.lat);
     setLongitude(result.lng);
@@ -172,7 +215,8 @@ export function AddLocationForm({ initialUrl }: AddLocationFormProps) {
         </div>
         <p className="text-sm text-muted-foreground mb-6 max-w-lg">
           Drop a link from WhatsApp, Google Maps, or Instagram —
-          we&apos;ll pull out the details. Or search by name.
+          we&apos;ll pull out the details. Or search by name. Or, if
+          you&apos;re standing right in front of it, use your current location.
         </p>
 
         {/* Supported sources */}
@@ -260,6 +304,45 @@ export function AddLocationForm({ initialUrl }: AddLocationFormProps) {
                 </button>
               ))}
             </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="editorial-divider text-[10px] tracking-[0.25em] uppercase text-muted-foreground my-6">
+          or
+        </div>
+
+        {/* Use current location */}
+        <div>
+          <Label className="text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-2 block">
+            <Crosshair className="inline h-3 w-3 mr-1.5" />
+            I&apos;m here right now
+          </Label>
+          <Button
+            type="button"
+            onClick={handleUseCurrentLocation}
+            disabled={locating}
+            variant="outline"
+            className="h-12 rounded-sm w-full justify-start gap-3"
+          >
+            {locating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Finding you…
+              </>
+            ) : (
+              <>
+                <Crosshair className="h-4 w-4" strokeWidth={1.75} />
+                Use my current location
+              </>
+            )}
+          </Button>
+          <p className="text-[11px] text-muted-foreground/70 mt-2 italic">
+            Fastest way to capture a street-food stall, café, or restaurant you&apos;re
+            standing in front of — we&apos;ll fill in the pin and address.
+          </p>
+          {locateError && (
+            <p className="text-[12px] text-destructive mt-2">{locateError}</p>
           )}
         </div>
 

@@ -5,6 +5,10 @@ import { useState, useEffect, useCallback, useRef } from "react";
 interface GeolocationState {
   latitude: number | null;
   longitude: number | null;
+  // Browser-reported 1-sigma horizontal accuracy in metres. ~5–20m for GPS,
+  // hundreds-to-thousands of metres when the OS falls back to wifi/IP geolocation.
+  accuracy: number | null;
+  fetchedAt: number | null;
   error: string | null;
   loading: boolean;
 }
@@ -13,6 +17,8 @@ export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
     latitude: null,
     longitude: null,
+    accuracy: null,
+    fetchedAt: null,
     error: null,
     loading: true,
   });
@@ -24,7 +30,7 @@ export function useGeolocation() {
       return;
     }
 
-    setState((prev) => ({ ...prev, loading: true }));
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -32,6 +38,8 @@ export function useGeolocation() {
         setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          fetchedAt: Date.now(),
           error: null,
           loading: false,
         });
@@ -40,7 +48,10 @@ export function useGeolocation() {
         if (cancelledRef.current) return;
         setState((prev) => ({ ...prev, error: err.message, loading: false }));
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      // maximumAge: 0 — never return a stale cached position. The previous
+      // 60s window made the "distance to" reading lag behind the user as
+      // they moved, producing visibly wrong distances.
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   }, []);
 
