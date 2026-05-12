@@ -1,5 +1,7 @@
 // Idempotent seed for built-in Tote templates.
-// Runs at most once: a no-op when any built-in row already exists.
+// No-op when at least one built-in row already exists, so admin-deleted
+// built-ins are re-seeded on the next Tote request (instead of staying
+// missing until the container restarts).
 
 import { db } from "@/lib/db";
 import { checklistTemplates, checklistTemplateItems } from "@/lib/db/schema";
@@ -7,16 +9,11 @@ import { eq } from "drizzle-orm";
 import { ulid } from "ulid";
 import { BUILT_IN_TEMPLATES } from "./built-in-templates";
 
-let seededInThisProcess = false;
-
 export async function seedBuiltInTemplates(): Promise<void> {
-  if (seededInThisProcess) return;
-  seededInThisProcess = true;
-
   const existing = await db.query.checklistTemplates.findFirst({
     where: eq(checklistTemplates.isBuiltIn, true),
   });
-  if (existing) return; // already seeded
+  if (existing) return;
 
   for (const tpl of BUILT_IN_TEMPLATES) {
     const id = ulid();

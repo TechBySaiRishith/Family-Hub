@@ -59,8 +59,28 @@ export async function POST() {
 
   if (!res.ok) {
     const text = await res.text();
+    let twilioCode: number | undefined;
+    let twilioMessage: string | undefined;
+    try {
+      const parsed = JSON.parse(text) as { code?: number; message?: string };
+      twilioCode = parsed.code;
+      twilioMessage = parsed.message;
+    } catch {
+      // Twilio responded with non-JSON — keep going with the status code only.
+    }
+    // Log the full body server-side; do NOT echo it to the client (it can
+    // include the Accounts/<SID>/Messages.json URL, the From number, etc.).
+    console.error(`[larder/send-whatsapp] Twilio ${res.status} body=`, text);
     return NextResponse.json(
-      { error: `Twilio rejected the message (${res.status}). ${text.slice(0, 200)}` },
+      {
+        error:
+          twilioCode === 63016 || twilioCode === 21610
+            ? "Recipient hasn't joined the Twilio sandbox or the 24-hour session expired. Have them re-send the join code."
+            : twilioMessage
+              ? `WhatsApp send failed: ${twilioMessage}`
+              : `WhatsApp send failed (HTTP ${res.status}).`,
+        twilioCode,
+      },
       { status: 502 },
     );
   }
