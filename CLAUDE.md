@@ -7,10 +7,12 @@ A family-shared PWA super-app. Mini-apps share a single shell with a left sideba
 ## Mini-apps
 - **Locations** (`/locations/*`) — restaurants and places, with map providers + reviews
 - **Coupons** (`/coupons/*`) — promo codes with paste-parse + OCR + multi-channel expiry reminders
-- The shell is designed so mini-app #3 is a route namespace + a `MiniApp` definition in `src/lib/mini-apps/registry.ts` away. See `docs/ADDING-A-MINI-APP.md`.
+- **Tote** (`/tote/*`) — pre-event packing checklists with shared + private items and templates
+- **Larder** (`/larder/*`) — household restock list grouped by aisle, sent to WhatsApp via wa.me link or Twilio
+- The shell is designed so a 5th mini-app is a route namespace + a `MiniApp` definition in `src/lib/mini-apps/registry.ts` away. See `docs/ADDING-A-MINI-APP.md`.
 
 ## Tech Stack
-- Next.js 15 (App Router), React 19, TypeScript
+- Next.js 16 (App Router), React 19, TypeScript
 - Tailwind CSS 4 + shadcn/ui (built on `@base-ui/react` — uses `render` prop, not `asChild`)
 - SQLite via better-sqlite3 + Drizzle ORM
 - Auth.js v5 (credentials)
