@@ -5,8 +5,11 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/app/data
+    # AUTH_SECRET / AUTH_URL come from .env.local (see docs/RASPBERRY-PI.md step 6).
+    # Compose fails to start if the file is missing — better than booting with a
+    # known-public fallback secret.
+    env_file:
+      - .env.local
     environment:
       - DATABASE_PATH=/app/data/location-manager.db
-      - AUTH_SECRET=${AUTH_SECRET:-change-me-to-a-random-secret}
-      - AUTH_URL=${AUTH_URL:-http://localhost:3000}
     restart: unless-stopped
