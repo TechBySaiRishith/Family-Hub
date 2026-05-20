@@ -4,7 +4,11 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+# pnpm 10+ rejects unapproved build scripts (ERR_PNPM_IGNORED_BUILDS) and the
+# onlyBuiltDependencies config has shifted between releases. Skip lifecycle
+# scripts on install and rebuild only the native modules we actually need.
+RUN pnpm install --frozen-lockfile --ignore-scripts && \
+    pnpm rebuild better-sqlite3 sharp tesseract.js esbuild
 
 FROM base AS builder
 WORKDIR /app
