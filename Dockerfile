@@ -3,6 +3,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 FROM base AS deps
 WORKDIR /app
+# Alpine doesn't ship a C toolchain; better-sqlite3 / sharp need one to compile
+# (or to land prebuilt binaries that expect glibc shims).
+RUN apk add --no-cache python3 make g++ libc6-compat
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
 # pnpm 10+ rejects unapproved build scripts (ERR_PNPM_IGNORED_BUILDS) and the
 # onlyBuiltDependencies config has shifted between releases. Skip lifecycle
