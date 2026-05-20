@@ -1,0 +1,11 @@
+# pnpm 10+ moved per-project settings out of package.json's "pnpm" field
+# into this file. List native-build packages that are allowed to run their
+# postinstall scripts — without this, pnpm errors out with
+# ERR_PNPM_IGNORED_BUILDS on install.
+onlyBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - sharp
+  - tesseract.js
+  - msw
+  - unrs-resolver
