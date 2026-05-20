@@ -1,17 +1,20 @@
-FROM node:22-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+FROM node:22-slim AS base
+# Pin pnpm to v9 — v10 introduced strict build-script approval
+# (ERR_PNPM_IGNORED_BUILDS) that breaks native modules without ceremony.
+# Lockfile is v9.0, matches pnpm@9.
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 FROM base AS deps
 WORKDIR /app
-# Alpine doesn't ship a C toolchain; better-sqlite3 / sharp need one to compile
-# (or to land prebuilt binaries that expect glibc shims).
-RUN apk add --no-cache python3 make g++ libc6-compat
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
-# pnpm 10+ rejects unapproved build scripts (ERR_PNPM_IGNORED_BUILDS) and the
-# onlyBuiltDependencies config has shifted between releases. Skip lifecycle
-# scripts on install and rebuild only the native modules we actually need.
-RUN pnpm install --frozen-lockfile --ignore-scripts && \
-    pnpm rebuild better-sqlite3 sharp tesseract.js esbuild
+# Build tools as a safety net. better-sqlite3 / sharp normally land as
+# prebuilt binaries on linux-arm64-glibc (which node:22-slim provides),
+# so most of the time these aren't used — but having them avoids a
+# silent failure if a prebuild is missing for some package.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
@@ -23,15 +26,15 @@ ENV DATABASE_PATH=/app/data/location-manager.db
 
 RUN mkdir -p /app/data && pnpm run build
 
-FROM base AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_PATH=/app/data/location-manager.db
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
